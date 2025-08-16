@@ -1,6 +1,13 @@
-use crate::ca::*;
+use crate::solver::code20;
 use crate::int::*;
 use std::{fs, path::Path, io::Write};
+
+fn bits(n: Int, len: usize) -> Vec<u8> {
+    (0..len)
+        .map(|i| to_u8((n >> i) & one()))
+        .rev()
+        .collect()
+}
 
 fn log_solution_to_file(sol: Int, period: usize, shift: usize) {
     let filename = "output.txt";
@@ -62,7 +69,6 @@ fn save_rendered_solution(sol: Int, period: usize, shift: usize) {
         .save(&format!("renders/solution_p{period}_s{shift}_n{sol}.png"))
 }
 
-#[allow(dead_code)]
 pub fn handle_found_solution(sol: Int, period: usize, shift: usize) {
     
     println!("Found Solution: {sol}");
@@ -89,4 +95,3 @@ pub fn clear_renders() {
 pub fn clear_output_file() {
     let _ = fs::File::create("output.txt").and_then(|mut f| f.write_all(b""));
 }
-

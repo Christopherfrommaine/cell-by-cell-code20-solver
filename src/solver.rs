@@ -1,48 +1,83 @@
-use crate::handle_solution;
+use crate::handle_solution::handle_found_solution;
 use crate::int::*;
-use crate::ca::*;
-use crate::checks::*;
 
-pub fn solve_dfs(s: Int, period: usize, shift: usize, len: usize) {
+#[inline(always)]
+pub fn code20(n: Int) -> Int {
+    let a = n << 2u32;
+    let b = n << 1u32;
+    let c = n;
+    let d = n >> 1u32;
+    let e = n >> 2u32;
+    (a ^ b ^ c ^ d ^ e) ^ (a | b | c | d | e)
+}
 
-    if len > 90 {return;}
+fn gap_length_less_than(mut n: Int, max: u32) -> bool {
+    if n == zero() {return true;}
 
-    let offset = 2 * period;
+    n = n >> n.trailing_zeros();
 
-    // Run it
-    let o = run(s, period) << shift;
+    while n != zero() {
+        let tz = n.trailing_zeros();
+        if tz > max { return false; }
+        n >>= tz + 1;
+    }
+    true
+}
 
-    if o != 0 && o >> o.trailing_zeros() == s >> s.trailing_zeros() {
-        if is_unique_solution(s, period, shift) {
-            handle_solution::handle_found_solution(s, period, shift);
+pub fn solve(p: usize, s: usize) {
+    println!("Starting solve with p{p}, s{s}");
+
+    let len_i = 2 * p;
+    let n_i = one() << len_i;
+
+    solve_dfs(n_i, len_i, p, s);
+}
+
+pub fn solve_dfs(n: Int, len: usize, p: usize, s: usize) {
+    // Run the automata
+    let mut collected = zero();
+    let mut o = n;
+    for _ in 0..p {
+        o = code20(o);
+        collected |= o;
+    }
+    o = o >> s;
+
+    // Unchangable output bits
+    let mask = one() << (len - 2 * p + 1) - 1;
+    
+    // Check Periodicity
+    if n & mask != o & mask {return;}
+
+    // Check Gaps (for concatonated solutions)
+    if !gap_length_less_than(collected, 3) {return;}
+
+    // Check for Solution
+    if o == n {
+        // More expensive full run
+        let mut all = vec![n];
+        for _ in 0..p {
+            all.push(code20(all[all.len() - 1]));
         }
+    
+        // Maximum integer acheived over period
+        let max_org = all.iter().map(|i| *i >> i.trailing_zeros()).max().unwrap_or(zero());
+        let max_rev = all.iter().map(|i| i.reverse_bits()).map(|i| i >> i.trailing_zeros()).max().unwrap_or(zero());
+        let max = max_org.min(max_rev);
+
+        if max >> max.trailing_zeros() != n >> n.trailing_zeros() {return;}
+
+        // No subperiodicity
+        for row in &all[1..(all.len() - 2)] {
+            if *row >> row.trailing_zeros() == max >> max.trailing_zeros() {return;}
+        }
+
+        handle_found_solution(n, p, s);
 
         return;
     }
 
-    if !is_periodic(s, o, len, offset) {return;}
-
-    // Is part of known
-    let certain_bits_mask = (one() << (len - offset)) - 1;
-    if !max_gap_len_of_n(2, run_all(s, period).into_iter().map(|a| a & certain_bits_mask).fold(zero(), |a, b| a | b)) {return;}
-    if is_known(s, period, certain_bits_mask) {return;}
-    if is_solution(s, period, len, offset) {return;}
-    if is_finished(s, len, offset) {return;}
-
-    // Canditate solution should continue
-    let new_bit_pos = 1 << len;
-
-    solve_dfs(s, period, shift, len + 1);
-    solve_dfs(s | new_bit_pos, period, shift, len + 1);
-
-}
-
-
-pub fn solve(period: usize, shift: usize) {
-    println!("Starting solve with p{period}, s{shift}");
-
-    let len = 2 * period + 1;
-    let initial_cantidate = one() << (len - 1);
-
-    solve_dfs(initial_cantidate, period, shift, len);
+    // No checks have eliminated cantidate. Continue search.
+    solve_dfs(n, len + 1, p, s);
+    solve_dfs(n | (one() << len + 1), len + 1, p, s);
 }

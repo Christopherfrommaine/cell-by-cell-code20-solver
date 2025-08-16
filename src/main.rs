@@ -1,11 +1,8 @@
 mod int;
 mod handle_solution;
-mod ca;
 mod solver;
-mod known;
-mod checks;
 
-use crate::solver::{solve, solve_dfs};
+use crate::solver::solve;
 use crate::handle_solution::{clear_renders, clear_output_file};
 
 fn main() {
@@ -17,7 +14,9 @@ fn main() {
     // Run the solver
     // solve(6, 0);
 
-    for period in 1..20 {
-        solve(period, 0);
-    }
+    solve(10, 0);
+
+    // for period in 1..20 {
+    //     solve(period, 0);
+    // }
 }
