@@ -5,7 +5,8 @@ use log::*;
 use rayon::prelude::*;
 use crate::checks::*;
 
-
+/// The program often uses up all the memory on my computer and crashes,
+/// so this lets it check the memory usage and terminate if it reaches a certain level.
 fn get_ram_usage_percentage() -> f32 {
     let mut sys = sysinfo::System::new_all();
     sys.refresh_memory();
@@ -52,7 +53,6 @@ pub fn solve(period: usize, shift: usize) {
 
                 // Nonzero
                 if run(s, 10 * period) == zero() {
-                    // assert!(false);
                     return None;
                 }
 
@@ -65,7 +65,7 @@ pub fn solve(period: usize, shift: usize) {
 
             if is_finished(s, len, offset) {return None;}
 
-            // Automata is a solution so far!
+            // Canditate solution should continue
             let new_bit_pos = 1 << len;
             return Some(vec![s, s | new_bit_pos]);
 

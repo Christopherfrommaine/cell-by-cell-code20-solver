@@ -1,5 +1,6 @@
-use crate::{ca::{bits, code20, run_all}, int::{zero, Int}};
-use std::{fs, path::Path, io::{Write, BufRead, BufReader}};
+use crate::ca::*;
+use crate::int::*;
+use std::{fs, path::Path, io::Write};
 
 fn log_solution_to_file(sol: Int, period: usize, shift: usize) {
     let filename = "output.txt";
@@ -59,44 +60,6 @@ fn save_rendered_solution(sol: Int, period: usize, shift: usize) {
         .set_title(&format!("p{period} s{shift} n{sol}"))
         .as_image()
         .save(&format!("renders/solution_p{period}_s{shift}_n{sol}.png"))
-}
-
-fn read_tuples_from_file() -> Vec<(u128, usize, usize)> {
-    let file = fs::File::open("output.txt").expect("No output.txt file found.");
-    let reader = BufReader::new(file);
-
-    let mut tuples = Vec::new();
-
-    for line in reader.lines().flatten() {
-        let parts: Vec<&str> = line.split_whitespace().collect();
-        if parts.len() != 3 {
-            continue;
-        }
-        let n = parts[0].trim_start_matches('n').parse::<u128>();
-        let p = parts[1].trim_start_matches('p').parse::<usize>();
-        let s = parts[2].trim_start_matches('s').parse::<usize>();
-
-        if let (Ok(n), Ok(p), Ok(s)) = (n, p, s) {
-            tuples.push((n, p, s));
-            tuples.push((n.reverse_bits(), p, s));
-        }
-    }
-
-    tuples
-}
-
-fn is_already_found(n: Int, period: usize, shift: usize) -> bool {
-    let found = read_tuples_from_file();
-
-    for row in run_all(n, period) {
-        for f in found.iter().copied() {
-            if row >> row.trailing_zeros() == f.0 >> f.0.trailing_zeros() {
-                return true;
-            }
-        }
-    }
-
-    return false;
 }
 
 #[allow(dead_code)]

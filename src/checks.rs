@@ -36,8 +36,9 @@ pub fn is_periodic(s: Int, o: Int, len: usize, offset: usize) -> bool {
 pub fn is_solution(s: Int, period: usize, len: usize, offset: usize) -> bool {
     let leading_zeros_mask = ((one() << (len + 1)) - 1) ^ ((one() << (len - offset)) - 1);
     let is_solution = (len > 4 * period) && leading_zeros_mask & s == zero();
-
-    let idk_it_just_works = run(s, period) == s;
+    
+    let o = run(s, period);
+    let idk_it_just_works = o >> o.trailing_zeros() == s >> s.trailing_zeros();
     
     is_solution || idk_it_just_works
 }
@@ -98,13 +99,11 @@ pub fn is_finished(s: Int, len: usize, offset: usize) -> bool {
     
     let leading_zeros_mask = ((one() << (len - offset - 1)) - 1) ^ ((one() << (len - 1)) - 1);
 
-    // println!("s: {s:b}, mask: {:b}", leading_zeros_mask);
-
     let all_leading_bits_are_zero = leading_zeros_mask & s == 0;
 
     if len == offset + 1 {
         return false;
     }
 
-    all_leading_bits_are_zero && false
+    all_leading_bits_are_zero
 }

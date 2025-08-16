@@ -1,5 +1,6 @@
 use crate::int::{Int, to_u8};
 
+#[inline(always)]
 pub fn bits(n: Int, len: usize) -> Vec<u8> {
     (0..len)
         .map(|i| to_u8((n >> i) & 1))
@@ -7,6 +8,7 @@ pub fn bits(n: Int, len: usize) -> Vec<u8> {
         .collect()
 }
 
+#[inline(always)]
 pub fn code20(n: Int) -> Int {
     let a = n << 2;
     let b = n << 1;
@@ -17,6 +19,7 @@ pub fn code20(n: Int) -> Int {
 }
 
 #[allow(dead_code)]
+#[inline(always)]
 pub fn run(n: Int, steps: usize) -> Int {
     let mut state = n;
     for _ in 0..steps {
