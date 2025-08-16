@@ -1,22 +1,20 @@
 use crate::int::*;
 use crate::ca::*;
 use crate::known::known_reversed;
-use log::*;
 
 pub fn is_unique_solution(s: Int, period: usize, shift: usize) -> bool {
     let all = run_all(s, period);
     
     // Smallest during period
-    let min_org = all.iter().map(|i| i >> i.trailing_zeros()).min().unwrap_or(0);
-    let min_rev = all.iter().map(|i| i.reverse_bits()).map(|i| i >> i.trailing_zeros()).min().unwrap_or(0);
-    let min = min_org.min(min_rev);
-    if min >> min.trailing_zeros() != s >> s.trailing_zeros() {
+    let max_org = all.iter().map(|i| i >> i.trailing_zeros()).max().unwrap_or(0);
+    let max_rev = all.iter().map(|i| i.reverse_bits()).map(|i| i >> i.trailing_zeros()).max().unwrap_or(0);
+    let max = max_org.min(max_rev);
+    if max >> max.trailing_zeros() != s >> s.trailing_zeros() {
         return false;
     }
 
     // Correct period
     for (i, row) in all.into_iter().enumerate() {
-        trace!("{:?}, {:?}, {:?}, {:?}", row == s, row == s << shift, i == period, i == 0);
         if (row == s || row == s << shift) != (i == period || i == 0) {
             return false;
         }
@@ -27,7 +25,6 @@ pub fn is_unique_solution(s: Int, period: usize, shift: usize) -> bool {
 
 pub fn is_periodic(s: Int, o: Int, len: usize, offset: usize) -> bool {
     let periodic_bits_mask: u128 = (one() << (len - offset)) - 1;
-    debug!("len: {len}, periodic_bits_mask: 0b{periodic_bits_mask:.8b}");
     let known_bits_are_periodic = periodic_bits_mask & s == periodic_bits_mask & o;
 
     known_bits_are_periodic
@@ -36,8 +33,11 @@ pub fn is_periodic(s: Int, o: Int, len: usize, offset: usize) -> bool {
 pub fn is_solution(s: Int, period: usize, len: usize, offset: usize) -> bool {
     let leading_zeros_mask = ((one() << (len + 1)) - 1) ^ ((one() << (len - offset)) - 1);
     let is_solution = (len > 4 * period) && leading_zeros_mask & s == zero();
-    
+
     let o = run(s, period);
+
+    if o == zero() {return is_solution}
+
     let idk_it_just_works = o >> o.trailing_zeros() == s >> s.trailing_zeros();
     
     is_solution || idk_it_just_works
