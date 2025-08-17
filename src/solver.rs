@@ -24,6 +24,7 @@ fn gap_length_less_than(mut n: Int, max: u32) -> bool {
     true
 }
 
+#[allow(dead_code)]
 pub fn solve(p: usize, s: usize) {
     println!("Starting solve with p{p}, s{s}");
 
@@ -34,6 +35,10 @@ pub fn solve(p: usize, s: usize) {
 }
 
 pub fn solve_dfs(n: Int, len: usize, p: usize, s: usize) {
+
+    // Depth Exceeded
+    if len > BITS - 2 * p - 5 {return;}
+
     // Run the automata
     let mut collected = zero();
     let mut o = n;
@@ -50,26 +55,29 @@ pub fn solve_dfs(n: Int, len: usize, p: usize, s: usize) {
     if n & mask != o & mask {return;}
 
     // Check Gaps (for concatonated solutions)
-    if !gap_length_less_than(collected, 3) {return;}
+    if !gap_length_less_than(collected & mask, 3) {return;}
 
     // Check for Solution
     if o == n {
         // More expensive full run
         let mut all = vec![n];
-        for _ in 0..p {
+        for _ in 0..(p - 1) {
             all.push(code20(all[all.len() - 1]));
         }
     
         // Maximum integer acheived over period
-        let max_org = all.iter().map(|i| *i >> i.trailing_zeros()).max().unwrap_or(zero());
-        let max_rev = all.iter().map(|i| i.reverse_bits()).map(|i| i >> i.trailing_zeros()).max().unwrap_or(zero());
+        let max_org = all.iter().max().copied().unwrap_or(zero());
+        let max_org = max_org >> max_org.trailing_zeros();
+        let max_rev = all.iter().map(|i| i.reverse_bits()).max().unwrap_or(zero());
+        let max_rev = max_rev >> max_rev.trailing_zeros();
+
         let max = max_org.min(max_rev);
 
-        if max >> max.trailing_zeros() != n >> n.trailing_zeros() {return;}
+        if max != n >> n.trailing_zeros() {return;}
 
         // No subperiodicity
-        for row in &all[1..(all.len() - 2)] {
-            if *row >> row.trailing_zeros() == max >> max.trailing_zeros() {return;}
+        for row in &all[1..] {
+            if max == *row >> row.trailing_zeros() {return;}
         }
 
         handle_found_solution(n, p, s);
@@ -78,6 +86,19 @@ pub fn solve_dfs(n: Int, len: usize, p: usize, s: usize) {
     }
 
     // No checks have eliminated cantidate. Continue search.
-    solve_dfs(n, len + 1, p, s);
-    solve_dfs(n | (one() << len + 1), len + 1, p, s);
+    let new_len = len + 1;
+
+    if len > 2 * p + 10 {
+        // Basic solve at large depths
+
+        solve_dfs(n, new_len, p, s);
+        solve_dfs(n | (one() << new_len), new_len, p, s);
+    } else {
+        // Paralelleized solve at top-level nodes
+        rayon::join(
+            || solve_dfs(n, new_len, p, s),
+        || solve_dfs(n | (one() << new_len), new_len, p, s),
+        );
+    }
+    
 }
