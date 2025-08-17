@@ -9,19 +9,27 @@ pub struct U256 {
     v: [u64; 4]
 }
 
+#[allow(dead_code)]
 pub type Int = U256;
 
+#[allow(dead_code)]
 pub const BITS: usize = 256;
 
+
+#[allow(dead_code)]
 pub fn to_u8(n: Int) -> u8 {
     n.v[0] as u8
 }
 
+
+#[allow(dead_code)]
 #[inline(always)]
 pub fn one() -> Int {
     U256 {v: [1, 0, 0, 0]}
 }
 
+
+#[allow(dead_code)]
 #[inline(always)]
 pub fn zero() -> Int {
     U256 {v: [0, 0, 0, 0]}
