@@ -1,7 +1,11 @@
 mod int;
 mod handle_solution;
 mod solver;
-mod int_using_u128;
+
+// Using a fixed-width number for speed.
+// int.rs implements an integer based on the code
+// in either of these two files:
+// mod int_using_u128;
 mod int_using_u256;
 
 use crate::solver::*;
@@ -13,7 +17,7 @@ fn main() {
     clear_output_file();
 
     // Solve for all periods
-    for p in 1..20 {
+    for p in 1..50 {
         solve(p, 0);
     }
 }

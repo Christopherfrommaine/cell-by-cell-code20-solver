@@ -65,8 +65,7 @@ fn save_rendered_solution(sol: Int, period: usize, shift: usize) {
     array_plot(&arr)
         .set_axes(false)
         .set_title(&format!("p{period} s{shift} n{sol}"))
-        .as_image()
-        .save(&format!("renders/solution_p{period}_s{shift}_n{sol}.png"))
+        .save(&format!("renders/solution_p{period}_s{shift}_n{sol}.txt"))
 }
 
 pub fn handle_found_solution(sol: Int, period: usize, shift: usize) {

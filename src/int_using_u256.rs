@@ -1,5 +1,6 @@
-// Leter, I may need to change this to a custom u256 or u512 type,
-// so implement neccesary things here.
+// WARNING!
+// This code is pretty boilerplate. Don't bother looking at it.
+// Just trust me that it implements a 256-bit integer.
 
 use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not, Shl, ShlAssign, Shr, ShrAssign,};
 
@@ -32,16 +33,35 @@ impl U256 {
     }
 }
 
-impl std::fmt::Display for U256 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+use std::fmt;
 
-        write!(
-            f,
-            "{}",
-            self.v[0]
-        )
+impl fmt::Display for U256 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.v.iter().all(|&x| x == 0) {
+            return write!(f, "0");
+        }
+
+        let mut n = *self;
+        let mut digits = Vec::new();
+
+        while n.v.iter().any(|&x| x != 0) {
+            let mut remainder = 0u64;
+            for i in (0..4).rev() {
+                let value = ((remainder as u128) << 64) | (n.v[i] as u128);
+                n.v[i] = (value / 10) as u64;
+                remainder = (value % 10) as u64;
+            }
+            digits.push(remainder as u8);
+        }
+
+        for d in digits.iter().rev() {
+            write!(f, "{}", d)?;
+        }
+
+        Ok(())
     }
 }
+
 
 impl BitAnd for U256 {
     type Output = U256;

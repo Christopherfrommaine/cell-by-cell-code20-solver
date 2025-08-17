@@ -4,7 +4,6 @@ in pkgs.mkShell {
   buildInputs = [
     
     pkgs.rustup
-    pkgs.imagemagick
     
   ];
   

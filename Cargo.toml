@@ -7,11 +7,11 @@ edition = "2024"
 cgrustplot = "1.2.0"
 rayon = "1.11.0"
 
-# [profile.release]
-# opt-level = 3
-# debug = false
-# lto = "thin"
-# codegen-units = 1
-# panic = "abort"
-# overflow-checks = false
-# incremental = false
+[profile.release]
+opt-level = 3
+debug = false
+lto = "thin"
+codegen-units = 1
+panic = "abort"
+overflow-checks = false
+incremental = false
