@@ -37,7 +37,10 @@ pub fn solve(p: usize, s: usize) {
 pub fn solve_dfs(n: Int, len: usize, p: usize, s: usize) {
 
     // Depth Exceeded
-    if len > BITS - 2 * p - 5 {return;}
+    if len > BITS - 2 * p - 5 {
+        println!("DEPTH LIMIT REACHED");
+        return;
+    }
 
     // Run the automata
     let mut collected = zero();
@@ -59,6 +62,8 @@ pub fn solve_dfs(n: Int, len: usize, p: usize, s: usize) {
 
     // Check for Solution
     if o == n {
+        println!("{o}, ");
+
         // More expensive full run
         let mut all = vec![n];
         for _ in 0..(p - 1) {

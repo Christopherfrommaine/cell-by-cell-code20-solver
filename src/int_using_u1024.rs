@@ -1,6 +1,6 @@
 use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not, Shl, ShlAssign, Shr, ShrAssign};
 
-#[derive(Clone, Copy, PartialEq, Eq, Default, PartialOrd, Ord)]
+#[derive(Clone, Copy, Default)]
 pub struct U1024 {
     v: [u64; 16],
 }
@@ -28,6 +28,20 @@ pub fn one() -> Int {
 
 
 #[allow(dead_code)]
+pub fn from_u128(n: u128) -> U1024 {
+    let w1 = n as u64;
+    let w2 = (n >> 64) as u64;
+
+    U1024 { v: [w1, w2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }
+}
+
+#[allow(dead_code)]
+pub fn to_u128(n: Int) -> u128 {
+    debug_assert!(n.v[2..].iter().copied().all(|i| i == 0));
+    n.v[0] as u128 + ((n.v[1] as u128) << 64)
+}
+
+#[allow(dead_code)]
 #[inline(always)]
 pub fn zero() -> Int {
     U1024 { v: [0; 16] }
@@ -36,6 +50,32 @@ pub fn zero() -> Int {
 impl U1024 {
     pub fn from_words(words: [u64; 16]) -> Self {
         Self { v: words }
+    }
+}
+
+use std::cmp::Ordering;
+
+impl PartialEq for U1024 {
+    fn eq(&self, other: &Self) -> bool {
+        self.v == other.v
+    }
+}
+impl Eq for U1024 {}
+
+impl PartialOrd for U1024 {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for U1024 {
+    fn cmp(&self, other: &Self) -> Ordering {
+        // Compare limbs from most-significant to least-significant
+        for i in (0..16).rev() {
+            if self.v[i] < other.v[i] { return Ordering::Less; }
+            if self.v[i] > other.v[i] { return Ordering::Greater; }
+        }
+        Ordering::Equal
     }
 }
 
@@ -59,6 +99,11 @@ impl fmt::Display for U1024 {
 
         for d in digits.iter().rev() { write!(f, "{}", d)?; }
         Ok(())
+    }
+}
+impl fmt::Debug for Int {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(self, f)
     }
 }
 

@@ -17,6 +17,16 @@ pub fn to_u8(n: Int) -> u8 {
     n as u8
 }
 
+#[allow(dead_code)]
+pub fn from_u128(n: u128) -> Int {
+    n
+}
+
+#[allow(dead_code)]
+pub fn to_u128(n: Int) -> u128 {
+    n
+}
+
 
 #[allow(dead_code)]
 #[inline(always)]

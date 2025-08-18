@@ -4,7 +4,7 @@
 
 use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not, Shl, ShlAssign, Shr, ShrAssign,};
 
-#[derive(Clone, Copy, PartialEq, Eq, Default, PartialOrd, Ord)]
+#[derive(Clone, Copy, Default)]
 pub struct U256 {
     v: [u64; 4]
 }
@@ -33,6 +33,47 @@ pub fn one() -> Int {
 #[inline(always)]
 pub fn zero() -> Int {
     U256 {v: [0, 0, 0, 0]}
+}
+
+use std::cmp::Ordering;
+
+impl PartialEq for Int {
+    fn eq(&self, other: &Self) -> bool {
+        self.v == other.v
+    }
+}
+impl Eq for Int {}
+
+impl PartialOrd for Int {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Int {
+    fn cmp(&self, other: &Self) -> Ordering {
+        // Compare limbs from most-significant to least-significant
+        for i in (0..4).rev() {
+            if self.v[i] < other.v[i] { return Ordering::Less; }
+            if self.v[i] > other.v[i] { return Ordering::Greater; }
+        }
+        Ordering::Equal
+    }
+}
+
+#[allow(dead_code)]
+pub fn from_u128(n: u128) -> U256 {
+    let lower_bit_mask = (1u128 << 64) - 1;
+    let w1 = n & lower_bit_mask;
+    let w2 = n & (u128::MAX ^ lower_bit_mask);
+
+    U256 { v: [w1 as u64, w2 as u64, 0, 0] }
+}
+
+#[allow(dead_code)]
+pub fn to_u128(n: Int) -> u128 {
+    debug_assert!(n.v[2..].iter().copied().all(|i| i == 0), "Too large conversion encountered");
+    n.v[0] as u128 + ((n.v[1] as u128) << 64)
 }
 
 impl U256 {
@@ -67,6 +108,11 @@ impl fmt::Display for U256 {
         }
 
         Ok(())
+    }
+}
+impl fmt::Debug for Int {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(self, f)
     }
 }
 
