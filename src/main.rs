@@ -8,6 +8,7 @@ pub mod solver;
 pub mod int_using_u128;
 pub mod int_using_u256;
 pub mod int_using_u1024;
+pub mod int_using_u65536;
 
 use crate::solver::*;
 use crate::handle_solution::{clear_renders, clear_output_file};
@@ -19,13 +20,12 @@ fn main() {
 
     // Fix stack overflow during deep recursion with large integers
     rayon::ThreadPoolBuilder::new()
-        .stack_size(32 * 1024 * 1024) // 32 MB stack
+        .stack_size(1024 * 1024 * 1024) // stack size in bytes
         .build_global()
         .unwrap();
 
-
     // Solve for all periods
-    for p in 1..=10 {
+    for p in 1..=50 {
         solve(p, 0);
     }
 }

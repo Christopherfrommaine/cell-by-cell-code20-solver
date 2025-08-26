@@ -161,9 +161,9 @@ checksum = "9555578bc9e57714c812a1f84e4fc5b4d21fcb063490c624de019f7464c91268"
 
 [[package]]
 name = "cgrustplot"
-version = "1.2.0"
+version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "713f86273781efa619612bd68a8869edc1252488561a0e438862a902412aca94"
+checksum = "3e95da85cc1b9aa31fbbda4c8a6aebf2f87e342bcf87322b76d4ab98731595eb"
 dependencies = [
  "image",
  "log",

@@ -27,6 +27,11 @@ pub fn to_u128(n: Int) -> u128 {
     n
 }
 
+#[allow(dead_code)]
+pub fn mask_first_n_bits(n: usize) -> Int {
+    (1 << n) - 1
+}
+
 
 #[allow(dead_code)]
 #[inline(always)]

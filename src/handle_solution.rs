@@ -61,11 +61,17 @@ pub fn print_plotted_solution(sol: Int, period: usize, shift: usize) {
 fn save_rendered_solution(sol: Int, period: usize, shift: usize) {
     let arr = solution_to_array(sol, period, shift);
 
+    let string = format!("p{period}_s{shift}_n{sol}");
+    let string = if string.len() < 100 {string} else {string[..100].to_string()};
+
+
     use cgrustplot::{plots::array_plot::array_plot};
     array_plot(&arr)
         .set_axes(false)
-        .set_title(&format!("p{period} s{shift} n{sol}"))
-        .save(&format!("renders/solution_p{period}_s{shift}_n{sol}.txt"))
+        .set_title(&string)
+        // .save(&format!("renders/solution_p{period}_s{shift}_n{sol}.txt"))
+        .as_image()
+        .save(&format!("renders/solution_{string}.png"));
 }
 
 pub fn handle_found_solution(sol: Int, period: usize, shift: usize) {

@@ -37,8 +37,28 @@ pub fn from_u128(n: u128) -> U1024 {
 
 #[allow(dead_code)]
 pub fn to_u128(n: Int) -> u128 {
-    debug_assert!(n.v[2..].iter().copied().all(|i| i == 0));
+    // debug_assert!(n.v[2..].iter().copied().all(|i| i == 0));
     n.v[0] as u128 + ((n.v[1] as u128) << 64)
+}
+
+#[allow(dead_code)]
+pub fn mask_first_n_bits(n: usize) -> Int {
+    let mut o = [0u64; 16];
+    for i in 0..n {
+        o[i / 64 as usize] |= 1 << (i % 64);
+    }
+    Int {v: o}
+}
+
+
+impl Int {
+    pub fn count_ones(&self) -> u32 {
+        let mut total = 0u32;
+        for &word in &self.v {
+            total += word.count_ones();
+        }
+        total
+    }
 }
 
 #[allow(dead_code)]

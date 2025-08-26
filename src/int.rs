@@ -33,6 +33,11 @@ pub fn to_u128(n: Int) -> u128 {
     crate::int_using_u1024::to_u128(n)
 }
 
+#[allow(dead_code)]
+pub fn mask_first_bits(n: usize) -> Int {
+    crate::int_using_u1024::mask_first_n_bits(n)
+}
+
 
 
 #[cfg(test)]
@@ -170,6 +175,11 @@ mod tests {
                 assert_eq!(to_u128(xi >> s), x >> s, "SHR");
             }
         });
+    }
+
+    #[test]
+    fn test_first_n_bits_mask() {
+        assert_eq!(to_u128(mask_first_bits(5)), (1 << 5) - 1);
     }
 
     #[test]

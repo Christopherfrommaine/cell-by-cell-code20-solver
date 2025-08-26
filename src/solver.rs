@@ -1,4 +1,4 @@
-use crate::handle_solution::handle_found_solution;
+use crate::handle_solution::*;
 use crate::int::*;
 
 #[inline(always)]
@@ -13,7 +13,6 @@ pub fn code20(n: Int) -> Int {
 
 fn gap_length_less_than(mut n: Int, max: u32) -> bool {
     if n == zero() {return true;}
-
     n = n >> n.trailing_zeros();
 
     while n != zero() {
@@ -35,10 +34,12 @@ pub fn solve(p: usize, s: usize) {
 }
 
 pub fn solve_dfs(n: Int, len: usize, p: usize, s: usize) {
+    // len is the position (zero-indexed from right to left) of the first possible 1
 
     // Depth Exceeded
     if len > BITS - 2 * p - 5 {
-        return;
+        eprintln!("DEPTH LIMIT REACHED\n{n}");
+        std::process::exit(1);
     }
 
     // Run the automata
@@ -51,13 +52,27 @@ pub fn solve_dfs(n: Int, len: usize, p: usize, s: usize) {
     o = o >> s;
 
     // Unchangable output bits
-    let mask = one() << (len - 2 * p + 1) - 1;
+    let mask = mask_first_bits(len - 2 * p + 1);
     
     // Check Periodicity
     if n & mask != o & mask {return;}
 
     // Check Gaps (for concatonated solutions)
     if !gap_length_less_than(collected & mask, 3) {return;}
+
+    // Tilability check (for infinitely repeatable patterns)
+    for pattern_length in 1..((len + 1) / 2) {
+        let pattern = n & (mask_first_bits(pattern_length) << (len - pattern_length + 1));
+        
+        let mut rep = zero();
+        for i in 0..((len / pattern_length) + 1) {
+            rep |= pattern >> (pattern_length * i)
+        }
+
+        if (n ^ rep).count_ones() + 10 < n.count_ones() / 2 {
+            return;
+        }
+    }
 
     // Check for Solution
     if o == n {
@@ -90,7 +105,7 @@ pub fn solve_dfs(n: Int, len: usize, p: usize, s: usize) {
     // No checks have eliminated cantidate. Continue search.
     let new_len = len + 1;
 
-    if len > 2 * p + 10 {
+    if len > 2 * p + 10  {
         // Basic solve at large depths
 
         solve_dfs(n, new_len, p, s);
