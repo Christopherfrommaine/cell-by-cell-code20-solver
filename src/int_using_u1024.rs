@@ -1,6 +1,6 @@
 use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not, Shl, ShlAssign, Shr, ShrAssign};
 
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy, Default, Hash)]
 pub struct U1024 {
     v: [u64; 16],
 }

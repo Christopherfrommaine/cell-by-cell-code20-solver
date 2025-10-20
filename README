@@ -2,6 +2,8 @@
 
 ## Run the Program
 
+For rendering to work, YOU MUST INSTALL imagemagick.
+
 Install rust (with rustup or rustc), then simply run `cargo r` for a normal run or `cargo r --release` for an optimized run (configured to be very optimized at the cost of compilation time). Results are saved to `output.txt` as well as to `renders/`.
 
 Currently it is set up to loop through all periods from 1 to 50 and try to find solutions. I expect periods less than 10 to be decently fast, but it slows down exponentially from there. It's parallelized and IMO pretty optimized, but let me know if you have suggestions. 

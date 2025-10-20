@@ -13,7 +13,10 @@ pub mod int_using_u65536;
 use crate::solver::*;
 use crate::handle_solution::{clear_renders, clear_output_file};
 
+
 fn main() {
+    // MAKE SURE imagemagick IS INSTALLED!
+
     // Initialization
     clear_renders();
     clear_output_file();
@@ -25,7 +28,19 @@ fn main() {
         .unwrap();
 
     // Solve for all periods
-    for p in 1..=50 {
+
+    for p in 1..50 {
         solve(p, 0);
     }
+
+    // for p in 1..=2 {
+    //     for s in 0..=(2 * p) {
+    // 
+    //         if (p, s) == (1, 1) {
+    //             print!("");
+    //         }
+    // 
+    //         solve(p, s);
+    //     }
+    // }
 }
