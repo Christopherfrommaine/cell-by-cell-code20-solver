@@ -3,42 +3,53 @@
 /// just change all occourances of 256 to 1024, or 128 to 256, or whatever
 /// it is currently to whatever you want it to be.
 
-pub type Int = crate::int_using_u1024::Int;
+use bnum::types::*;
 
-pub const BITS: usize = crate::int_using_u1024::BITS;
+pub type Int = U1024;
+
+pub const BITS: usize = Int::BITS as usize;
 
 pub fn to_u8(n: Int) -> u8 {
-    crate::int_using_u1024::to_u8(n)
+    to_u128(n) as u8
 }
 
 #[inline(always)]
 pub fn one() -> Int {
-    crate::int_using_u1024::one()
+    Int::ONE
 }
 
 #[inline(always)]
 pub fn zero() -> Int {
-    crate::int_using_u1024::zero()
+    Int::ZERO
 }
 
 #[allow(dead_code)]
 #[inline(always)]
 pub fn from_u128(n: u128) -> Int {
-    crate::int_using_u1024::from_u128(n)
+    Int::from_digit(n as u64)
 }
 
 #[allow(dead_code)]
 #[inline(always)]
 pub fn to_u128(n: Int) -> u128 {
-    crate::int_using_u1024::to_u128(n)
+    *(n.digits().first().unwrap()) as u128
 }
+
 
 #[allow(dead_code)]
+#[inline(always)]
 pub fn mask_first_bits(n: usize) -> Int {
-    crate::int_using_u1024::mask_first_n_bits(n)
+    let mut o = [0u64; BITS / 64];
+    let max = n / 64;
+    for i in 0..max {
+        o[i] = u64::MAX
+    }
+    for i in (64 * max)..n {
+        o[max] |= 1 << (i % 64)
+    }
+    
+    Int::from_digits(o)
 }
-
-
 
 #[cfg(test)]
 mod tests {

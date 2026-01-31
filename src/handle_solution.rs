@@ -82,6 +82,12 @@ pub fn handle_found_solution(sol: Int, period: usize, shift: usize) {
     save_rendered_solution(sol, period, shift);
 }
 
+#[allow(unused_variables)]
+pub fn handle_found_solution_poorly(sol: Int, period: usize, shift: usize) {
+    
+    println!("Found Solution: {sol}");
+}
+
 
 pub fn clear_renders() {
     let dir = Path::new("./renders");

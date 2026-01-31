@@ -2,7 +2,7 @@ use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, N
 
 #[derive(Clone, Copy, Default, Hash)]
 pub struct U1024 {
-    v: [u64; 16],
+    pub v: [u64; 16],
 }
 
 
@@ -190,27 +190,180 @@ fn shl_words(src: &[u64; 16], n: usize) -> [u64; 16] {
 }
 
 fn shr_words(src: &[u64; 16], n: usize) -> [u64; 16] {
-    if n >= 1024 { return [0; 16]; }
-    let word_shift = n / 64;
-    let bit_shift = n % 64;
+
     let mut out = [0u64; 16];
 
-    if bit_shift == 0 {
-        for i in 0..(16 - word_shift) { out[i] = src[i + word_shift]; }
+    if n >= 1024 {
         return out;
     }
 
-    for i in 0..16 {
-        let src_idx = i + word_shift;
-        if src_idx >= 16 { out[i] = 0; }
-        else {
-            let lo = src[src_idx] >> bit_shift;
-            let hi = if src_idx + 1 < 16 { src[src_idx + 1] << (64 - bit_shift) } else { 0 };
-            out[i] = lo | hi;
-        }
+    let word_shift = n >> 6;
+    let bit_shift = n & 63;  // bit_shift = n % 64
+
+    if bit_shift == 0 {
+        let len = 16 - word_shift;
+        out[..len].copy_from_slice(&src[word_shift..]);
+        return out;
     }
+
+    let inv = 64 - bit_shift;
+
+    let max = 16 - word_shift - 1;
+
+    for i in 0..max {
+        let j = i + word_shift;
+        out[i] = (src[j] >> bit_shift) | (src[j + 1] << inv);
+    }
+
+    if max < 16 {
+        out[max] = src[max + word_shift] >> bit_shift;
+    }
+
     out
 }
+
+#[inline(always)]
+fn shr_words_one(src: &[u64; 16]) -> [u64; 16] {
+
+    let mut out = [0u64; 16];
+
+    out[0] = (src[0] >> 1) | (src[1] << 63);
+    out[1] = (src[1] >> 1) | (src[2] << 63);
+    out[2] = (src[2] >> 1) | (src[3] << 63);
+    out[3] = (src[3] >> 1) | (src[4] << 63);
+    out[4] = (src[4] >> 1) | (src[5] << 63);
+    out[5] = (src[5] >> 1) | (src[6] << 63);
+    out[6] = (src[6] >> 1) | (src[7] << 63);
+    out[7] = (src[7] >> 1) | (src[8] << 63);
+    out[8] = (src[8] >> 1) | (src[9] << 63);
+    out[9] = (src[9] >> 1) | (src[10] << 63);
+    out[10] = (src[10] >> 1) | (src[11] << 63);
+    out[11] = (src[11] >> 1) | (src[12] << 63);
+    out[12] = (src[12] >> 1) | (src[13] << 63);
+    out[13] = (src[13] >> 1) | (src[14] << 63);
+    out[14] = (src[14] >> 1) | (src[15] << 63);
+    out[15] = src[15] >> 1;
+
+    out
+}
+
+#[inline(always)]
+fn shl_words_one(src: &[u64; 16]) -> [u64; 16] {
+
+    let mut out = [0u64; 16];
+
+    out[0] = src[0] << 1;
+    out[1] = (src[1] << 1) | (src[0] >> 63);
+    out[2] = (src[2] << 1) | (src[1] >> 63);
+    out[3] = (src[3] << 1) | (src[2] >> 63);
+    out[4] = (src[4] << 1) | (src[3] >> 63);
+    out[5] = (src[5] << 1) | (src[4] >> 63);
+    out[6] = (src[6] << 1) | (src[5] >> 63);
+    out[7] = (src[7] << 1) | (src[6] >> 63);
+    out[8] = (src[8] << 1) | (src[7] >> 63);
+    out[9] = (src[9] << 1) | (src[8] >> 63);
+    out[10] = (src[10] << 1) | (src[9] >> 63);
+    out[11] = (src[11] << 1) | (src[10] >> 63);
+    out[12] = (src[12] << 1) | (src[11] >> 63);
+    out[13] = (src[13] << 1) | (src[12] >> 63);
+    out[14] = (src[14] << 1) | (src[13] >> 63);
+    out[15] = (src[15] << 1) | (src[14] >> 63);
+
+    out
+}
+
+#[inline(always)]
+fn shr_words_two(src: &[u64; 16]) -> [u64; 16] {
+
+    let mut out = [0u64; 16];
+
+    out[0] = (src[0] >> 2) | (src[1] << 62);
+    out[1] = (src[1] >> 2) | (src[2] << 62);
+    out[2] = (src[2] >> 2) | (src[3] << 62);
+    out[3] = (src[3] >> 2) | (src[4] << 62);
+    out[4] = (src[4] >> 2) | (src[5] << 62);
+    out[5] = (src[5] >> 2) | (src[6] << 62);
+    out[6] = (src[6] >> 2) | (src[7] << 62);
+    out[7] = (src[7] >> 2) | (src[8] << 62);
+    out[8] = (src[8] >> 2) | (src[9] << 62);
+    out[9] = (src[9] >> 2) | (src[10] << 62);
+    out[10] = (src[10] >> 2) | (src[11] << 62);
+    out[11] = (src[11] >> 2) | (src[12] << 62);
+    out[12] = (src[12] >> 2) | (src[13] << 62);
+    out[13] = (src[13] >> 2) | (src[14] << 62);
+    out[14] = (src[14] >> 2) | (src[15] << 62);
+    out[15] = src[15] >> 2;
+
+    out
+}
+
+#[inline(always)]
+fn shl_words_two(src: &[u64; 16]) -> [u64; 16] {
+
+    let mut out = [0u64; 16];
+
+    out[0] = src[0] << 2;
+    out[1] = (src[1] << 2) | (src[0] >> 62);
+    out[2] = (src[2] << 2) | (src[1] >> 62);
+    out[3] = (src[3] << 2) | (src[2] >> 62);
+    out[4] = (src[4] << 2) | (src[3] >> 62);
+    out[5] = (src[5] << 2) | (src[4] >> 62);
+    out[6] = (src[6] << 2) | (src[5] >> 62);
+    out[7] = (src[7] << 2) | (src[6] >> 62);
+    out[8] = (src[8] << 2) | (src[7] >> 62);
+    out[9] = (src[9] << 2) | (src[8] >> 62);
+    out[10] = (src[10] << 2) | (src[9] >> 62);
+    out[11] = (src[11] << 2) | (src[10] >> 62);
+    out[12] = (src[12] << 2) | (src[11] >> 62);
+    out[13] = (src[13] << 2) | (src[12] >> 62);
+    out[14] = (src[14] << 2) | (src[13] >> 62);
+    out[15] = (src[15] << 2) | (src[14] >> 62);
+
+    out
+}
+
+// #[target_feature(enable = "avx2")]
+// unsafe fn shr_words_avx2(src: &[u64; 16], n: usize) -> [u64; 16] {
+//     use std::arch::x86_64::*;
+// 
+//     let word_shift = n >> 6;
+//     let bit_shift = (n & 63) as i32;
+//     let inv = 64 - bit_shift;
+// 
+//     let mut out = [0u64; 16];
+// 
+//     for i in (0..16).step_by(4) {
+//         let j = i + word_shift;
+//         if j + 4 >= 17 { break; }
+// 
+//         let v0 = unsafe { _mm256_loadu_si256(src[j..].as_ptr() as *const __m256i) };
+//         let v1 = unsafe { _mm256_loadu_si256(src[j+1..].as_ptr() as *const __m256i) };
+// 
+//         let lo = _mm256_srli_epi64(v0, const bit_shift);
+//         let hi = _mm256_slli_epi64(v1, inv as *const i32);
+// 
+//         let r = _mm256_or_si256(lo, hi);
+//         _mm256_storeu_si256(out[i..].as_mut_ptr() as *mut __m256i, r);
+//     }
+// 
+//     out
+// }
+
+impl U1024 {
+    pub fn shr1(&self) -> Self {
+        U1024 { v: shr_words_one(&self.v) }
+    }
+    pub fn shr2(&self) -> Self {
+        U1024 { v: shr_words_two(&self.v) }
+    }
+    pub fn shl1(&self) -> Self {
+        U1024 { v: shl_words_one(&self.v) }
+    }
+    pub fn shl2(&self) -> Self {
+        U1024 { v: shl_words_two(&self.v) }
+    }
+}
+
 
 impl Shl<usize> for U1024 { type Output = U1024; fn shl(self, rhs: usize) -> U1024 { U1024::from_words(shl_words(&self.v, rhs)) } }
 impl Shr<usize> for U1024 { type Output = U1024; fn shr(self, rhs: usize) -> U1024 { U1024::from_words(shr_words(&self.v, rhs)) } }

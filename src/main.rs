@@ -28,8 +28,7 @@ fn main() {
         .unwrap();
 
     // Solve for all periods
-
-    for p in 1..50 {
+    for p in 1.. {
         solve(p, 0);
     }
 
